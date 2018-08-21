@@ -15,12 +15,20 @@ sys.dont_write_bytecode = True
 from config import config_common, config_preprocessing, config_DataAugmentation
 
 def preprocessing_func(image, label):
+    """image preprocessing
+
+    (image_array - mean) / max_value(or variance)
+
+    if one_hot: label will be parsed to one-hot format
+    """
     mean      = tf.constant(config_preprocessing['mean_pixel'], dtype=tf.float32)
     max_value = tf.constant(config_preprocessing['max_pixel'], dtype=tf.float32)
     num_class = config_common['num_classes']
+    one_hot = config_preprocessing['one_hot']
 
     image = tf.divide((tf.cast(image, tf.float32) - mean), max_value)
-    if True:
+
+    if one_hot:
         label = tf.one_hot(tf.cast(label, tf.int64), num_class)
     return image, label
 
@@ -31,14 +39,13 @@ def augmentation_func(image, label):
         if config_DataAugmentation['random_shift_switch']:
             image = tf.image.random_flip_left_right(image)
             image = tf.image.random_flip_up_down(image)
-            image = _random_rotate(image, 180)
+            image = _random_rotate(image, config_DataAugmentation['random_rotate_angle'])
 
         # random color and brightness
 
         if config_DataAugmentation['random_color_switch']:
             # Random hue`max_hue` must be in the interval [0, 0.5]
             image = tf.image.random_hue(image, max_delta=config_DataAugmentation['max_hue'])
-
             # Random saturation
             image = tf.image.random_saturation(image,
                                             lower=config_DataAugmentation['lower_sat'],
@@ -55,12 +62,12 @@ def augmentation_func(image, label):
         if config_DataAugmentation['random_crop_switch']:
             image = _resize_image_shorter_edge(image, config_DataAugmentation['resize_shorter_edge'])
             image = tf.random_crop(image, config_common['input_shape'])
-            image = _random_erasing(image, 16)
+            image = _random_erasing(image, config_DataAugmentation['erasing_max_size'])
 
 
         # random noise
         if config_DataAugmentation['random_noise_switch']:
-            image = tf.layers.dropout(image, rate=0.01, training=True)
+            #image = tf.layers.dropout(image, rate=0.01, training=True)
             image = _gaussian_noise_layer(image, config_DataAugmentation['gaussian_noise_scale'])
             image = _salt_and_pepper_noise(image,
                                            config_DataAugmentation['salt_noise_scale'],
@@ -88,8 +95,10 @@ def _resize_image_shorter_edge(image, new_shorter_edge=299):
             lambda: (new_shorter_edge, (width / height) * new_shorter_edge),
             lambda: (new_shorter_edge, (height / width) * new_shorter_edge))
 
+        new_shape = tf.concat([[new_height], [tf.cast(new_width, tf.int32)]], axis=0)
+        
         image = tf.expand_dims(image, 0)
-        image = tf.image.resize_bilinear(image, (new_height, new_width, ))
+        image = tf.image.resize_bilinear(image, new_shape)
         image = tf.squeeze(image, [0])
     return image
 

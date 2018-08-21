@@ -109,26 +109,20 @@ def data_loader(input_handle,
     
     """ Creat an Iterator to load data
     Args:
-        input_handle(str or list): the input handle to receive loading message.
-        
-        mode(str): a switch controlling input type
+         - input_handle(str or list): the input handle to receive loading message.
+         - mode(str): a switch controlling input type
             if `mode` is 'tfrecord', `input handle` must be a tensorflow record list.
-            if `mode` is 'folder', `input handle` must be a image folder like `target_folder`
-        
-        num_repeat(int): the number of dataset repeating times.
-        
-        batch_size(int): the data number of a batch
-        
-        shuffle(bool): whether to shuffle data.
-
-        num_processors(int): number of processor to load data.
-
-        augmentation(bool): whether to apply augmentation to the loading data.
-
-        name(str): the name scope of data loader
-
-        device(str): which device to put the data loader.
+            if `mode` is 'folder', `input handle` must be a image folder like `target_folder`    
+         - num_repeat(int): the number of dataset repeating times.
+         - batch_size(int): the data number of a batch
+         - shuffle(bool): whether to shuffle data.
+         - num_processors(int): number of processor to load data.
+         - augmentation(bool): whether to apply augmentation to the loading data.
+         - name(str): the name scope of data loader
+         - device(str): which device to put the data loader.
             the option is `cpu:0`/`gpu:0`/`gpu:1`/`gpu:2`/...
+    Rets:
+         - iterator: data iterator input handle
     """
 
     with tf.variable_scope(name, reuse=False):
@@ -145,12 +139,12 @@ def data_loader(input_handle,
 
             if augmentation:
                 dataset = dataset.map(augmentation_func, num_processors)
-
+            # data preprocessing map to image function
             dataset = dataset.map(resize_output_image, num_processors)
             dataset = dataset.repeat(num_repeat)
             dataset = dataset.batch(batch_size)
             dataset = dataset.prefetch(buffer_size=buffer_size)
-
+            # iterator creat
             iterator = dataset.make_initializable_iterator()
 
     return iterator
@@ -158,7 +152,7 @@ def data_loader(input_handle,
 
 if __name__ == '__main__':
 
-    train_tfrecord_lst = ['../output/tfrecord/cifar10/test.tfrecord']
+    train_tfrecord_lst = ['../output/tfrecord/cifar-10/test.tfrecord']
     folder = '/data/dogs_vs_cats/train'
     train_loader = data_loader(train_tfrecord_lst,
                                mode='tfrecord',
@@ -185,6 +179,6 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
     for i, z in enumerate(image):
-        print label[i]
+        print(label[i])
         plt.imshow(z)
         plt.show()

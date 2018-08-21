@@ -211,7 +211,7 @@ if __name__ == '__main__':
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     train_folder = args.data_folder
-    
+    """
     train_valid_item_lst = CreatePathMessageFromFolder(
         train_folder, balance=True, shuffle=True)
     split_number = int(args.train_ratio * len(train_valid_item_lst))
@@ -226,4 +226,4 @@ if __name__ == '__main__':
     test_item_lst = CreatePathMessageFromFolder(train_folder, balance=True, shuffle=True)
     test_record_path = os.path.join(output_folder, 'test.tfrecord')
     RecordMaker(test_item_lst, test_record_path)
-    """
+    

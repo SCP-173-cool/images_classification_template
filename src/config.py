@@ -9,7 +9,7 @@ import os
 
 config_common = {'input_shape': (32, 32, 3), 'num_classes': 10}
 
-config_preprocessing = {'mean_pixel':[0, 0, 0], 'max_pixel': 255.}
+config_preprocessing = {'mean_pixel':[0, 0, 0], 'max_pixel': 255., 'one_hot': True}
 
 config_data_loader = {'input_handle': ['../output/tfrecord/cifar10/train.tfrecord'],
                        'mode': 'tfrecord',
@@ -42,6 +42,7 @@ config_trainer = {'num_epochs': 300,
 
 config_DataAugmentation = {'random_shift_switch': True,
                                 # random shift augmentaiton
+                                'random_rotate_angle': 180,
 
                            'random_color_switch': True,
                                 # random color augmentation
@@ -53,6 +54,7 @@ config_DataAugmentation = {'random_shift_switch': True,
                            'random_crop_switch': True,
                                 # random crop augmentation
                                 'resize_shorter_edge': 36,
+                                'erasing_max_size': 18,
 
                            'random_noise_switch': True,
                                 # random noise augmentation
